@@ -4,8 +4,7 @@ import moment from 'moment';
 import _ from 'lodash';
 import * as firebase from 'firebase/app';
 import 'firebase/firestore';
-
-const ck2 = 'foo_data';
+import { dataKey, eventKey } from '../config';
 
 let months = [
     'January',
@@ -167,7 +166,7 @@ export default function Calendar(props) {
                 let first = moment(rows[0].getAttribute('date'), 'DD-MM-YYYY').valueOf();
                 let last = moment(rows[rows.length - 1].getAttribute('date'), 'DD-MM-YYYY').endOf('day').valueOf();
                 if(props.event)
-                    db.collection(ck2)
+                    db.collection(dataKey)
                     .where('time', '>=', first)
                     .where('time', '<=', last)
                     .where('event', '==', props.event.id)
@@ -191,8 +190,7 @@ export default function Calendar(props) {
         let db = firebase.firestore();
         window.db = db;
         // initial
-        let collectionKey = 'foo';
-        let collection = window.db.collection(collectionKey);
+        let collection = window.db.collection(eventKey);
         collection.get().then(snap => {
             let events = [];
             snap.forEach(d => {
@@ -218,7 +216,7 @@ export default function Calendar(props) {
                 styleTile(el, el.id, hasEvents ? null : props.event);
                 el.classList.add('block');
                 if(props.event)
-                db.collection(ck2)
+                db.collection(dataKey)
                     .where('time', '>=', start)
                     .where('time', '<=', end)
                     .where('event', '==', props.event.id)
@@ -231,11 +229,11 @@ export default function Calendar(props) {
                         });
                         if(events.length) {
                             events.forEach(id => {
-                                db.collection(ck2).doc(id).delete();
+                                db.collection(dataKey).doc(id).delete();
                             });
                             styleTile(el, el.id);
                         } else {
-                            db.collection(ck2).add({
+                            db.collection(dataKey).add({
                                 time: date.valueOf(),
                                 event: props.event.id,
                             });

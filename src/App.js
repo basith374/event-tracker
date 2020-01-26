@@ -4,6 +4,7 @@ import Register from './components/Register';
 import Calendar from './components/Calendar';
 import * as firebase from 'firebase/app';
 import 'firebase/firestore';
+import { eventKey } from './config';
 
 function App() {
   let [tab, setTab] = useState('register');
@@ -12,8 +13,7 @@ function App() {
   let [busy, setBusy] = useState(true);
   let db = firebase.firestore();
   let fetchEvents = () => {
-    let collectionKey = 'foo';
-    let ref = db.collection(collectionKey);
+    let ref = db.collection(eventKey);
     ref.get().then(snap => {
       let events = [];
       snap.forEach(d => {
