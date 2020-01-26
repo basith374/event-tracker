@@ -1,0 +1,28 @@
+.reg {
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+}
+.reg-b {
+    flex: 1;
+    display: flex;
+    padding: 1rem;
+    flex-direction: column-reverse;
+}
+.reg-i {
+    background: #ccc;
+    display: inline-block;
+    padding: 1rem;
+    border-radius: 2rem;
+    color: #fff;
+    margin-bottom: 1rem;
+    margin-right: 1rem;
+    user-select: none;
+}
+
+.reg-i:active {
+    opacity: .9;
+}
+.reg-i.dis {
+    opacity: .5;
+}
