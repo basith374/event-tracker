@@ -4,7 +4,6 @@ import Register from './components/Register';
 import Calendar from './components/Calendar';
 import * as firebase from 'firebase/app';
 import 'firebase/firestore';
-import _ from 'lodash';
 
 function App() {
   let [tab, setTab] = useState('register');
