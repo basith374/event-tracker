@@ -19,7 +19,7 @@ export default function Register(props) {
                     id={e.id}
                     style={{background: e.color}}
                     key={i}
-                    onClick={e => register(e)}
+                    onClick={() => register(e)}
                     >{e.name}</div>)}
             </div>}
         </div>
