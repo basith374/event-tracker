@@ -33,3 +33,69 @@ button {
   0% {transform: rotate(0);}
   100% {transform: rotate(360deg);}
 }
+/* others */
+.App-center {
+  display: flex;
+  height: 100%;
+  align-items: center;
+  background: #000;
+  justify-content: center;
+}
+.App-center input {
+  font-size: 20px;
+  background: transparent;
+  color: #fff;
+  border: 1px solid #ccc;
+  width: 100%;
+  text-align: center;
+  border-radius: 2rem;
+  line-height: 36px;
+}
+.App-center button {
+  width: 100%;
+  font-size: 20px;
+  line-height: 36px;
+  border-radius: 2rem;
+}
+.App-center .lbl {
+  color: #555;
+}
+.App-center h2 {
+  text-align: center;
+}
+.App-center .wlcm {
+  text-align: center;
+}
+.App-center .wlcm img {
+  width: 100px;
+}
+.App-sect {
+  margin-bottom: 1rem;
+}
+.App-sect.ex {
+  margin-bottom: 4rem;
+}
+button.danger {
+  background: #e74c3c;
+}
+button.green {
+  background: #27ae60;
+}
+.App-login {
+  background: #fff;
+}
+.App-login input {
+  color: #000;
+}
+.App-colors {
+  display: flex;
+  flex-flow: wrap;
+  height: 100%;
+}
+.App-colors > div {
+  width: 33.33%;
+  transition: 500ms opacity;
+}
+.App-colors > div:active {
+  opacity: 0;
+}

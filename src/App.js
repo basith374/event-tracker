@@ -5,15 +5,21 @@ import Calendar from './components/Calendar';
 import * as firebase from 'firebase/app';
 import 'firebase/firestore';
 import { eventKey } from './config';
+import Create from './components/Create';
+import ColorPicker from './components/ColorPicker';
+import DeleteModal from './components/DeleteModal';
+import Login from './components/Login';
 
 function App() {
   let [tab, setTab] = useState('register');
   let [event, setEvent] = useState('');
+  let localUser = localStorage.getItem('user');
   let [events, setEvents] = useState([]);
+  let [user, setUser] = useState(localUser || '');
   let [busy, setBusy] = useState(true);
   let db = firebase.firestore();
   let fetchEvents = () => {
-    let ref = db.collection(eventKey);
+    let ref = db.collection(eventKey(localStorage.getItem('user')));
     ref.get().then(snap => {
       let events = [];
       snap.forEach(d => {
@@ -31,16 +37,66 @@ function App() {
   useEffect(() => {
     window.onpopstate = () => {
       let _tab = 'register'
+      if(tab === 'color') _tab = 'create';
       setTab(_tab);
     }
-    fetchEvents();
+    let localUser = localStorage.getItem('user');
+    if(localUser) {
+      db.doc('foo_users/' + localUser).get().then(doc => {
+        if(doc.exists) fetchEvents();
+      });
+    } else {
+      setBusy(false);
+    }
   }, []);
   let openEvent = (event) => {
     setEvent(event);
     setTab('calendar');
   }
+  let editEvent = event => {
+    setEvent(event);
+    setTab('create');
+  }
+  let createEvent = () => {
+    setEvent('');
+    window._event = null;
+    setTab('create');
+  }
+  let saveTemp = name => {
+    window.name = name;
+    setTab('color');
+  }
+  let saveEvent = color => {
+    let db = firebase.firestore();
+    let eventNew = {
+      color, name: window.name,
+    }
+    if(event) {
+      db.collection('foo_users/' + localUser + '/items').doc(event.id).set(eventNew);
+      setEvents(events.map(e => {
+        if(e.id === event.id) return Object.assign({
+          id: event.id,
+        }, eventNew);
+        return e;
+      }));
+    } else {
+      db.collection('foo_users/' + localUser + '/items').add(eventNew).then(ref => {
+        setEvents(events.concat(Object.assign({
+          id: ref.id,
+        }, eventNew)));
+      });
+    }
+    setTab('register');
+  }
+  let deleteItem = id => {
+    let localUser = localStorage.getItem('user');
+    db.collection('foo_users/' + localUser + '/items').doc(id).delete();
+    setTab('register');
+    setEvents(events.filter(e => e.id !== id));
+  }
   useEffect(() => {
     let tabs = [
+      'create',
       'calendar',
     ];
     if(tabs.includes(tab)) window.history.pushState({}, '', '');
@@ -50,14 +106,19 @@ function App() {
       busy={busy}
       setEvent={openEvent}
       events={events}
+      editEvent={editEvent}
+      createEvent={createEvent}
       event={event} />
     if(tab === 'calendar') return <Calendar event={event} setEvent={setEvent} />
+    if(tab === 'create') return <Create saveTemp={saveTemp} setTab={setTab} event={event} />
+    if(tab === 'color') return <ColorPicker setColor={saveEvent} />
+    if(tab === 'delete') return <DeleteModal event={event} setTab={setTab} removeItem={deleteItem} />
     return null;
   }
   return (
     <div className="App">
       <div className="App-view">
-        {showApp()}
+        {user ? showApp() : <Login setUser={setUser} />}
       </div>
     </div>
   );

@@ -3,6 +3,20 @@
     flex-direction: column;
     min-height: 100%;
 }
+.reg-h {
+    display: flex;
+    justify-content: flex-end;
+    padding: 1rem;
+}
+.reg-h img {
+    width: 22px;
+    vertical-align: top;
+}
+.reg-h button {
+    padding: 10px;
+    background-image: linear-gradient(120deg, #f093fb 0%, #f5576c 100%);
+    border: none;
+}
 .reg-b {
     flex: 1;
     display: flex;
@@ -25,4 +39,23 @@
 }
 .reg-i.dis {
     opacity: .5;
+}
+.reg-e {
+    color: #fff;
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+    padding-right: 60px;
+    font-size: 24px;
+}
+.reg-e img {
+    width: 100%;
+    filter: invert(1);
+}
+.reg-e .txt {
+    margin-right: 10px;
+}
+.reg-e .image {
+    height: 85px;
+    width: 85px;
 }

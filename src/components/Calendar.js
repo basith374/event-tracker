@@ -190,7 +190,7 @@ export default function Calendar(props) {
         let db = firebase.firestore();
         window.db = db;
         // initial
-        let collection = window.db.collection(eventKey);
+        let collection = window.db.collection(eventKey(localStorage.getItem('user')));
         collection.get().then(snap => {
             let events = [];
             snap.forEach(d => {

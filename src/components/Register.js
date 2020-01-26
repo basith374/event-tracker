@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import 'firebase/firestore';
 import './register.css';
 
@@ -7,11 +7,36 @@ function Loading() {
 }
 
 export default function Register(props) {
+    let clicktimer = useRef();
     let register = (event) => {
         props.setEvent(event);
     }
+    let onMouseUp = () => {
+        clearTimeout(clicktimer.current);
+        if(window._event) register(window._event);
+    }
+    let onMouseDown = e => {
+        window._event = e;
+        clicktimer.current = setTimeout(() => {
+            props.editEvent(e);
+            clicktimer.current = null;
+        }, 1000);
+    }
     return (
         <div className="reg">
+            <div className="reg-h">
+                <button onClick={props.createEvent}>
+                    <img src={require('../plus.png')} alt="plus" />
+                </button>
+            </div>
+            {!props.busy && props.events.length === 0 && <div className="reg-e">
+                <div className="txt">
+                    Add new
+                </div>
+                <div className="image">
+                    <img src={require('../swirly-scribbled-arrow.png')} />
+                </div>
+            </div>}
             {props.busy && <Loading />}
             {props.events.length > 0 && <div className="reg-b">
                 {props.events.map((e, i) => <div
@@ -19,7 +44,11 @@ export default function Register(props) {
                     id={e.id}
                     style={{background: e.color}}
                     key={i}
-                    onClick={() => register(e)}
+                    onMouseDown={() => onMouseDown(e)}
+                    onMouseUp={onMouseUp}
+                    onTouchStart={() => onMouseDown(e)}
+                    onTouchMove={() => window._event = null}
+                    onTouchEnd={onMouseUp}
                     >{e.name}</div>)}
             </div>}
         </div>

@@ -1,4 +1,4 @@
 module.exports = {
-    eventKey: 'foo',
+    eventKey: key => 'foo_users/' + key + '/items',
     dataKey: 'foo_data',
 }
