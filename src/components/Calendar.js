@@ -127,8 +127,8 @@ const fillUp = (offset, maxBoxes, boxHeight, event) => {
                 if(row) {
                     let tile = row.children[moment(data.time).day()];
                     if(tile) styleTile(tile, date, event);
+                    row.setAttribute('has-events', true);
                 }
-                row.setAttribute('has-events', true);
             });
         });
 }
