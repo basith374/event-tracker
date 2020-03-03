@@ -1,31 +1,10 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 import './calendar.css';
 import moment from 'moment';
 import _ from 'lodash';
 import * as firebase from 'firebase/app';
 import 'firebase/firestore';
-import { dataKey, eventKey } from '../config';
-
-let months = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December',
-];
-
-function findNext(month, next = true) {
-    let idx = months.indexOf(month);
-    if(!next) return months[(idx === 0 ? months.length : idx) - 1];
-    return months[idx + 1 === months.length ? 0 : idx + 1];
-}
+import { dataKey } from '../config';
 
 function createText(p, text, cls) {
     let c = document.createElement('div');
@@ -89,6 +68,25 @@ function fillWeek(row, date, odd, month) {
     return _.uniq(months).length > 1;
 }
 
+function fetchWeek(event, row) {
+    let first = moment(row.getAttribute('date'), 'DD-MM-YYYY').valueOf();
+    let last = moment(row.getAttribute('date'), 'DD-MM-YYYY').endOf('week').valueOf();
+    window.db.collection(dataKey)
+        .where('time', '>=', first)
+        .where('time', '<=', last)
+        .where('event', '==', event.id)
+        .get()
+        .then(snap => {
+            snap.forEach(f => {
+                let data = f.data();
+                let date = moment(data.time).startOf('week').format('DD-MM-YYYY');
+                let tile = row.children[moment(data.time).day()];
+                if(tile) styleTile(tile, date, event);
+            });
+            row.setAttribute('has-events', snap.length > 0);
+        });
+}
+
 window.expander = (db) => {
     db.get().then(snap => {
         snap.forEach(f => {
@@ -97,11 +95,11 @@ window.expander = (db) => {
     })
 }
 
-const fillUp = (offset, maxBoxes, boxHeight) => {
+const fillUp = (offset, maxBoxes, boxHeight, event) => {
     let odd = true;
     let start = moment().startOf('week').subtract(offset, 'weeks');
     let month = start.month();
-    [...Array(maxBoxes).keys()].forEach(f => {
+    let rows = [...Array(maxBoxes).keys()].map(f => {
         let row = document.createElement('div');
         row.className = 'cal-i';
         row.style.height = boxHeight + 'px';
@@ -112,16 +110,35 @@ const fillUp = (offset, maxBoxes, boxHeight) => {
         fillWeek(row, start.format('DD-MM-YYYY'), odd, month);
         start.add(1, 'week');
         document.querySelector('.cal').appendChild(row);
+        return row;
     })
+    let first = moment(rows[0].getAttribute('date'), 'DD-MM-YYYY').valueOf();
+    let last = moment(rows[rows.length - 1].getAttribute('date'), 'DD-MM-YYYY').endOf('day').valueOf();
+    window.db.collection(dataKey)
+        .where('time', '>=', first)
+        .where('time', '<=', last)
+        .where('event', '==', event.id)
+        .get()
+        .then(snap => {
+            snap.forEach(f => {
+                let data = f.data();
+                let date = moment(data.time).startOf('week').format('DD-MM-YYYY');
+                let row = document.getElementById('week-' + date);
+                if(row) {
+                    let tile = row.children[moment(data.time).day()];
+                    if(tile) styleTile(tile, date, event);
+                }
+                row.setAttribute('has-events', true);
+            });
+        });
 }
 
-window.findNext = findNext
-
 export default function Calendar(props) {
-    let items = useRef([]);
-    let busy = useRef(true);
     useEffect(() => {
+        let db = firebase.firestore();
+        window.db = db;
         let boxHeight = 60;
+        // calculations, dimensions, resize
         let height = document.querySelector('.cal').offsetHeight;
         let bufferBoxes = 10;
         let visibleBoxes = Math.ceil(height / boxHeight);
@@ -129,82 +146,40 @@ export default function Calendar(props) {
         let newHeight = boxHeight * maxBoxes;
         let bufferHeight = boxHeight * bufferBoxes;
         document.querySelector('.cal').style.height = newHeight + 'px';
-        fillUp(bufferBoxes + parseInt(visibleBoxes / 2, 10), maxBoxes, boxHeight);
+        // fill up tiles
+        fillUp(bufferBoxes + parseInt(visibleBoxes / 2, 10), maxBoxes, boxHeight, props.event);
+        // attach scroll listeners
         document.querySelector('.cal-c').addEventListener('scroll', e => {
             let parent = document.querySelector('.cal');
-            if(!busy.current)
-            if(e.target.scrollTop >= bufferHeight + bufferHeight / 2) { // scroll down
-                [...Array(Math.ceil(bufferBoxes / 2)).keys()].forEach(f => {
-                    let el = parent.firstChild;
-                    parent.removeChild(el);
-                    let time = moment(parent.lastChild.getAttribute('date'), 'DD-MM-YYYY');
-                    let prevMonth = time.month();
-                    time.add('1', 'week');
-                    let curOdd = parent.lastChild.classList.contains('odd');
-                    let month = time.month();
-                    let odd = month !== prevMonth ? !curOdd : curOdd;
-                    fillWeek(el, time.format('DD-MM-YYYY'), odd, month);
-                    parent.appendChild(el);
-                });
+            if(e.target.scrollTop >= bufferHeight + boxHeight) { // scroll down
+                let el = parent.firstChild;
+                parent.removeChild(el);
+                let time = moment(parent.lastChild.getAttribute('date'), 'DD-MM-YYYY');
+                let prevMonth = time.month();
+                time.add('1', 'week');
+                let curOdd = parent.lastChild.classList.contains('odd');
+                let month = time.month();
+                let odd = month !== prevMonth ? !curOdd : curOdd;
+                fillWeek(el, time.format('DD-MM-YYYY'), odd, month);
+                fetchWeek(props.event, el);
+                parent.appendChild(el);
             } else if(e.target.scrollTop < bufferHeight) { // scroll up
-                [...Array(Math.ceil(bufferBoxes / 2)).keys()].forEach(f => {
-                    let el = parent.lastChild;
-                    parent.removeChild(el);
-                    let time = moment(parent.firstChild.getAttribute('date'), 'DD-MM-YYYY');
-                    let prevMonth = time.month();
-                    time.subtract('1', 'week');
-                    let curOdd = parent.firstChild.classList.contains('odd');
-                    let month = time.month();
-                    let odd = month !== prevMonth ? !curOdd : curOdd;
-                    fillWeek(el, time.format('DD-MM-YYYY'), odd, month);
-                    parent.insertBefore(el, parent.firstChild);
-                });
+                let el = parent.lastChild;
+                parent.removeChild(el);
+                let time = moment(parent.firstChild.getAttribute('date'), 'DD-MM-YYYY');
+                let prevMonth = time.month();
+                time.subtract('1', 'week');
+                let curOdd = parent.firstChild.classList.contains('odd');
+                let month = time.month();
+                let odd = month !== prevMonth ? !curOdd : curOdd;
+                fillWeek(el, time.format('DD-MM-YYYY'), odd, month);
+                fetchWeek(props.event, el);
+                parent.insertBefore(el, parent.firstChild);
             }
         });
-        document.querySelector('.cal-c').addEventListener('scroll', _.debounce(e => {
-            let rows = document.querySelectorAll('.cal-i');
-            if(rows.length) {
-                let first = moment(rows[0].getAttribute('date'), 'DD-MM-YYYY').valueOf();
-                let last = moment(rows[rows.length - 1].getAttribute('date'), 'DD-MM-YYYY').endOf('day').valueOf();
-                if(props.event)
-                    db.collection(dataKey)
-                    .where('time', '>=', first)
-                    .where('time', '<=', last)
-                    .where('event', '==', props.event.id)
-                    .get()
-                    .then(snap => {
-                        snap.forEach(f => {
-                            let data = f.data();
-                            let event = _.find(items.current, ['id', data.event]);
-                            let date = moment(data.time).startOf('week').format('DD-MM-YYYY');
-                            let row = document.getElementById('week-' + date);
-                            if(row) {
-                                let tile = row.children[moment(data.time).day()];
-                                if(tile) styleTile(tile, date, event);
-                                if(event) row.setAttribute('has-events', true);
-                            }
-                        });
-                    });
-            }
-        }, 200));
+        // scroll top mid
         document.querySelector('.cal-c').scrollTop = bufferHeight;
-        let db = firebase.firestore();
-        window.db = db;
-        // initial
-        let collection = window.db.collection(eventKey);
-        collection.get().then(snap => {
-            let events = [];
-            snap.forEach(d => {
-                let item = d.data();
-                events.push({
-                    id: d.id,
-                    name: item.name,
-                    color: item.color,
-                });
-            });
-            items.current = events;
-            busy.current = false;
-        });
+        // toggle listeners, punch, register
         document.querySelector('.cal').addEventListener('click', e => {
             let el = e.target;
             if(el) {
@@ -238,10 +213,7 @@ export default function Calendar(props) {
                                 time: date.valueOf(),
                                 event: props.event.id,
                             });
-                            let event = _.find(items.current, ['id', props.event.id]);
-                            if(event) {
-                                styleTile(el, el.id, event);
-                            }
+                            styleTile(el, el.id, props.event);
                         }
                     }).catch(rsp => {
                         el.classList.remove('block');
