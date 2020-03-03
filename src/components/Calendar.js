@@ -59,6 +59,7 @@ function styleTile(tile, date, event) {
     if(event) {
         style.background = event.color;
         tile.setAttribute('has-events', true);
+        tile.classList.remove('lit');
     } else {
         style.background = null;
         tile.removeAttribute('has-events');
