@@ -99,7 +99,7 @@ window.expander = (db) => {
 
 const fillUp = (offset, maxBoxes, boxHeight) => {
     let odd = true;
-    let start = moment().startOf('week').subtract(offset + 1, 'weeks');
+    let start = moment().startOf('week').subtract(offset, 'weeks');
     let month = start.month();
     [...Array(maxBoxes).keys()].forEach(f => {
         let row = document.createElement('div');
@@ -129,7 +129,7 @@ export default function Calendar(props) {
         let newHeight = boxHeight * maxBoxes;
         let bufferHeight = boxHeight * bufferBoxes;
         document.querySelector('.cal').style.height = newHeight + 'px';
-        fillUp(bufferBoxes + visibleBoxes, maxBoxes, boxHeight);
+        fillUp(bufferBoxes + parseInt(visibleBoxes / 2, 10), maxBoxes, boxHeight);
         document.querySelector('.cal-c').addEventListener('scroll', e => {
             let parent = document.querySelector('.cal');
             if(!busy.current)
