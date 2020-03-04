@@ -5,8 +5,14 @@
 }
 .cal-c {
     position: relative;
-    overflow: overlay;
+    overflow: scroll;
     flex: 1;
+}
+.cal-c {
+    scrollbar-width: none;
+}
+.cal-c::-webkit-scrollbar {
+    display: none;
 }
 .cal-h {
     display: flex;
@@ -19,14 +25,10 @@
     background: #111;
 }
 .cal {
-    overflow: scroll;
     position: absolute;
     height: 100%;
     left: 0;
     right: 0;
-}
-.cal::-webkit-scrollbar {
-    display: none;
 }
 .cal-i {
     text-align: center;
