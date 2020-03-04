@@ -6,16 +6,22 @@ import * as firebase from 'firebase/app';
 import 'firebase/firestore';
 import { dataKey } from '../config';
 
+function createEl(p, cls) {
+    let el = document.createElement('div');
+    el.className = cls;
+    return p.appendChild(el);
+}
+
 function createText(p, text, cls) {
-    let c = document.createElement('div');
+    let c = createEl(p, cls);
     c.innerText = text;
-    c.className = cls;
-    return p.appendChild(c);
+    return c;
 }
 
 function createTile(con, date) {
     let d = moment(date, 'DD-MM-YYYY');
     createText(con, d.date(), 'c-d');
+    createEl(con, 'pn-c');
     styleTile(con, date);
 }
 
@@ -36,7 +42,14 @@ function styleTile(tile, date, event) {
         tile.classList.remove('lit');
     }
     if(event) {
-        style.background = event.color;
+        if(event.length > 1) event.forEach(f => {
+            let point = document.createElement('div');
+            point.className = 'pnkt';
+            let color = createEl(point);
+            color.style.background = f.color;
+            tile.querySelector('.pn-c').appendChild(point);
+        });
+        else style.background = event[0].color;
         tile.setAttribute('has-events', true);
         tile.classList.remove('lit');
     } else {
@@ -74,7 +87,7 @@ function fetchWeek(event, row) {
     window.db.collection(dataKey)
         .where('time', '>=', first)
         .where('time', '<=', last)
-        .where('event', '==', event.id)
+        .where('event', 'in', event.map(e => e.id))
         .get()
         .then(snap => {
             snap.forEach(f => {
@@ -117,16 +130,25 @@ const fillUp = (offset, maxBoxes, boxHeight, event) => {
     window.db.collection(dataKey)
         .where('time', '>=', first)
         .where('time', '<=', last)
-        .where('event', '==', event.id)
+        .where('event', 'in', event.map(e => e.id))
         .get()
         .then(snap => {
+            let colorMap = _.mapValues(_.keyBy(event, 'id'), e => e.color);
+            let eventGrps = {};
             snap.forEach(f => {
                 let data = f.data();
-                let date = moment(data.time).startOf('week').format('DD-MM-YYYY');
-                let row = document.getElementById('week-' + date);
+                let date = moment(data.time).format('DD-MM-YYYY');
+                if(!(date in eventGrps)) eventGrps[date] = [];
+                eventGrps[date].push(Object.assign({color: colorMap[data.event]}, data));
+            });
+            Object.keys(eventGrps).forEach(bucket => {
+                // day is a bucket
+                let date = moment(bucket, 'DD-MM-YYYY')
+                let weekstart = date.clone().startOf('week').format('DD-MM-YYYY');
+                let row = document.getElementById('week-' + weekstart);
                 if(row) {
-                    let tile = row.children[moment(data.time).day()];
-                    if(tile) styleTile(tile, date, event);
+                    let tile = row.children[date.day()];
+                    if(tile) styleTile(tile, date, eventGrps[bucket]);
                     row.setAttribute('has-events', true);
                 }
             });
@@ -182,7 +204,7 @@ export default function Calendar(props) {
         // toggle listeners, punch, register
         document.querySelector('.cal').addEventListener('click', e => {
             let el = e.target;
-            if(el) {
+            if(el && props.event.length === 1) {
                 if(!/\d{2}-\d{2}-\d{4}/.test(el.id)) el = el.parentNode;
                 if(!el.classList.contains('cal-dat')) return;
                 let date = moment(el.id, 'DD-MM-YYYY');
@@ -191,11 +213,11 @@ export default function Calendar(props) {
                 let hasEvents = el.hasAttribute('has-events');
                 styleTile(el, el.id, hasEvents ? null : props.event);
                 el.classList.add('block');
-                if(props.event)
+                if(props.event.length)
                 db.collection(dataKey)
                     .where('time', '>=', start)
                     .where('time', '<=', end)
-                    .where('event', '==', props.event.id)
+                    .where('event', '==', props.event[0].id)
                     .get()
                     .then(snap => {
                         el.classList.remove('block');
@@ -211,7 +233,7 @@ export default function Calendar(props) {
                         } else {
                             db.collection(dataKey).add({
                                 time: date.valueOf(),
-                                event: props.event.id,
+                                event: props.event[0].id,
                             });
                             styleTile(el, el.id, props.event);
                         }
@@ -236,6 +258,9 @@ export default function Calendar(props) {
             <div className="cal-c">
                 <div className="cal"></div>
             </div>
+            {props.events.length > 1 && props.event.length < 3 && <div className="c-flt">
+                <button onClick={props.compareMode}>Compare</button>
+            </div>}
         </div>
     )
 }

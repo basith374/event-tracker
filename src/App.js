@@ -8,7 +8,7 @@ import { eventKey } from './config';
 
 function App() {
   let [tab, setTab] = useState('register');
-  let [event, setEvent] = useState('');
+  let [event, setEvent] = useState([]);
   let [events, setEvents] = useState([]);
   let [busy, setBusy] = useState(true);
   let db = firebase.firestore();
@@ -35,23 +35,25 @@ function App() {
     }
     fetchEvents();
   }, []);
-  let openEvent = (event) => {
-    setEvent(event);
+  let openEvent = (e) => {
+    setEvent(event.concat(e));
     setTab('calendar');
   }
   useEffect(() => {
     let tabs = [
       'calendar',
+      'compare',
     ];
     if(tabs.includes(tab)) window.history.pushState({}, '', '');
   }, [tab]);
+  let openCompareMode = () => setTab('compare');
   let showApp = () => {
-    if(tab === 'register') return <Register
+    if(['register', 'compare'].includes(tab)) return <Register
       busy={busy}
       setEvent={openEvent}
       events={events}
       event={event} />
-    if(tab === 'calendar') return <Calendar event={event} setEvent={setEvent} />
+    if(tab === 'calendar') return <Calendar event={event} setEvent={setEvent} events={events} compareMode={openCompareMode} />
     return null;
   }
   return (
