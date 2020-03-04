@@ -22,6 +22,11 @@ export default function Register(props) {
             clicktimer.current = null;
         }, 1000);
     }
+    let events = props.events;
+    if(props.event.length) {
+        let ids = props.event.map(e => e.id);
+        events = events.filter(e => !ids.includes(e.id));
+    }
     return (
         <div className="reg">
             <div className="reg-h">
@@ -39,12 +44,12 @@ export default function Register(props) {
             </div>}
             {props.busy && <Loading />}
             {props.events.length > 0 && <div className="reg-b">
-                {props.events.map((e, i) => <div
+                {events.map((e, i) => <div
                     className="reg-i"
                     id={e.id}
                     style={{background: e.color}}
                     key={i}
-                    onMouseDown={() => onMouseDown(e)}
+                    onMouseDown={() => props.mode === 'register' && onMouseDown(e)}
                     onMouseUp={onMouseUp}
                     onTouchStart={() => onMouseDown(e)}
                     onTouchMove={() => window._event = null}

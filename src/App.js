@@ -12,7 +12,7 @@ import Login from './components/Login';
 
 function App() {
   let [tab, setTab] = useState('register');
-  let [event, setEvent] = useState('');
+  let [event, setEvent] = useState([]);
   let localUser = localStorage.getItem('user');
   let [events, setEvents] = useState([]);
   let [user, setUser] = useState(localUser || '');
@@ -49,8 +49,8 @@ function App() {
       setBusy(false);
     }
   }, []);
-  let openEvent = (event) => {
-    setEvent(event);
+  let openEvent = (e) => {
+    setEvent(event.concat(e));
     setTab('calendar');
   }
   let editEvent = event => {
@@ -98,18 +98,20 @@ function App() {
     let tabs = [
       'create',
       'calendar',
+      'compare',
     ];
     if(tabs.includes(tab)) window.history.pushState({}, '', '');
   }, [tab]);
+  let openCompareMode = () => setTab('compare');
   let showApp = () => {
-    if(tab === 'register') return <Register
+    if(['register', 'compare'].includes(tab)) return <Register
       busy={busy}
       setEvent={openEvent}
       events={events}
       editEvent={editEvent}
       createEvent={createEvent}
       event={event} />
-    if(tab === 'calendar') return <Calendar event={event} setEvent={setEvent} />
+    if(tab === 'calendar') return <Calendar event={event} setEvent={setEvent} events={events} compareMode={openCompareMode} />
     if(tab === 'create') return <Create saveTemp={saveTemp} setTab={setTab} event={event} />
     if(tab === 'color') return <ColorPicker setColor={saveEvent} />
     if(tab === 'delete') return <DeleteModal event={event} setTab={setTab} removeItem={deleteItem} />

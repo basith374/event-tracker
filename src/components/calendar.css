@@ -5,8 +5,14 @@
 }
 .cal-c {
     position: relative;
-    overflow: overlay;
+    overflow: scroll;
     flex: 1;
+}
+.cal-c {
+    scrollbar-width: none;
+}
+.cal-c::-webkit-scrollbar {
+    display: none;
 }
 .cal-h {
     display: flex;
@@ -19,14 +25,10 @@
     background: #111;
 }
 .cal {
-    overflow: scroll;
     position: absolute;
     height: 100%;
     left: 0;
     right: 0;
-}
-.cal::-webkit-scrollbar {
-    display: none;
 }
 .cal-i {
     text-align: center;
@@ -43,6 +45,7 @@
     height: 100%;
     justify-content: center;
     align-items: center;
+    position: relative;
 }
 .cal-dat.block {
     pointer-events: none;
@@ -75,4 +78,38 @@
 .cal-dat.lit .c-d {
     background: #fff;
     color: #555;
+}
+.c-flt {
+    position: absolute;
+    bottom: 0;
+    padding: 2rem;
+    display: flex;
+    justify-content: center;
+    right: 0;
+    left: 0;
+}
+.c-flt > button {
+    padding: 1rem;
+    border-radius: 2rem;
+    padding: 1rem 2rem;
+    font-size: 14px;
+    background: #3498db;
+}
+.pn-c {
+    position: absolute;
+    top: 0;
+    display: flex;
+    flex-flow: wrap;
+}
+.pnkt {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.pnkt > div {
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
 }
