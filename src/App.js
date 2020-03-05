@@ -38,8 +38,11 @@ function App() {
     window.onpopstate = () => {
       let _tab = 'register'
       if(tab === 'color') _tab = 'create';
+      if(event.length) setEvent(event.slice(0, event.length - 1));
       setTab(_tab);
     }
+  }, [event]);
+  useEffect(() => {
     let localUser = localStorage.getItem('user');
     if(localUser) {
       db.doc('foo_users/' + localUser).get().then(doc => {
