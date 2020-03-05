@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import './calendar.css';
 import moment from 'moment';
 import _ from 'lodash';
@@ -156,6 +156,8 @@ const fillUp = (offset, maxBoxes, boxHeight, event) => {
 }
 
 export default function Calendar(props) {
+    let scrollDbnce = useRef();
+    let [compare, setCompare] = useState(true);
     useEffect(() => {
         let db = firebase.firestore();
         window.db = db;
@@ -172,6 +174,11 @@ export default function Calendar(props) {
         fillUp(bufferBoxes + parseInt(visibleBoxes / 2, 10), maxBoxes, boxHeight, props.event);
         // attach scroll listeners
         document.querySelector('.cal-c').addEventListener('scroll', e => {
+            if(scrollDbnce.current) clearTimeout(scrollDbnce.current);
+            scrollDbnce.current = setTimeout(() => {
+                setCompare(true);
+            }, 100);
+            setCompare(false);
             let parent = document.querySelector('.cal');
             if(e.target.scrollTop >= bufferHeight + boxHeight) { // scroll down
                 let el = parent.firstChild;
@@ -258,7 +265,7 @@ export default function Calendar(props) {
             <div className="cal-c">
                 <div className="cal"></div>
             </div>
-            {props.events.length > 1 && props.event.length < 3 && <div className="c-flt">
+            {props.events.length > 1 && props.event.length < 3 && <div className={'c-flt' + (compare ? ' show' : '')}>
                 <button onClick={props.compareMode}>Compare</button>
             </div>}
         </div>
