@@ -49,7 +49,7 @@ export default function Register(props) {
                     id={e.id}
                     style={{background: e.color}}
                     key={i}
-                    onMouseDown={() => props.mode === 'register' && onMouseDown(e)}
+                    onMouseDown={() => onMouseDown(e)}
                     onMouseUp={onMouseUp}
                     onTouchStart={() => onMouseDown(e)}
                     onTouchMove={() => window._event = null}
