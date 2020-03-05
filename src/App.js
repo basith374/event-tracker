@@ -57,7 +57,7 @@ function App() {
     setTab('calendar');
   }
   let editEvent = event => {
-    setEvent(event);
+    setEvent([event]);
     setTab('create');
   }
   let createEvent = () => {
@@ -117,7 +117,7 @@ function App() {
     if(tab === 'calendar') return <Calendar event={event} setEvent={setEvent} events={events} compareMode={openCompareMode} />
     if(tab === 'create') return <Create saveTemp={saveTemp} setTab={setTab} event={event} />
     if(tab === 'color') return <ColorPicker setColor={saveEvent} />
-    if(tab === 'delete') return <DeleteModal event={event} setTab={setTab} removeItem={deleteItem} />
+    if(tab === 'delete') return <DeleteModal event={event[0]} setTab={setTab} removeItem={deleteItem} />
     return null;
   }
   return (
