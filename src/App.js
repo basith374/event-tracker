@@ -61,7 +61,7 @@ function App() {
     setTab('create');
   }
   let createEvent = () => {
-    setEvent('');
+    setEvent([]);
     window._event = null;
     setTab('create');
   }
