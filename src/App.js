@@ -74,11 +74,11 @@ function App() {
     let eventNew = {
       color, name: window.name,
     }
-    if(event) {
-      db.collection('foo_users/' + localUser + '/items').doc(event.id).set(eventNew);
+    if(event.length) {
+      db.collection('foo_users/' + localUser + '/items').doc(event[0].id).set(eventNew);
       setEvents(events.map(e => {
-        if(e.id === event.id) return Object.assign({
-          id: event.id,
+        if(e.id === event[0].id) return Object.assign({
+          id: event[0].id,
         }, eventNew);
         return e;
       }));
