@@ -1,26 +1,35 @@
 import React from 'react';
 import * as firebase from 'firebase/app';
 import 'firebase/firestore';
+import GoogleLogin from 'react-google-login';
+import _ from 'lodash';
 
 export default function Login(props) {
-    let login = () => {
-      let username = document.getElementById('name').value;
+    let login = (username) => {
       if(username) {
         let db = firebase.firestore();
-        db.collection('foo_users').add({
-          join: new Date(),
-          username,
-        })
-        .then((ref) => {
-          props.setUser(ref.id);
-          localStorage.setItem('user', ref.id);
-        });
+        db.collection('foo_users')
+          .where('username', '==', username)
+          .get()
+          .then(ref => {
+            if(ref.length) {
+              props.setUser(ref[0].id);
+              localStorage.setItem('user', ref[0].id);
+            } else {
+              db.collection('foo_users').add({
+                join: new Date(),
+                username,
+              }).then(ref => {
+                props.setUser(ref.id);
+                localStorage.setItem('user', ref.id);
+              })
+            }
+          });
       }
     }
-    let keyDown = e => {
-      if(e.keyCode === 13) {
-        login();
-      }
+    const responseGoogle = (response) => {
+      const email = _.get(response, 'profileObj.email');
+      login(email)
     }
     return <div className="App-center App-login">
         <div>
@@ -29,7 +38,12 @@ export default function Login(props) {
                 <h2>Welcome</h2>
             </div>
             <div>
-                <input type="text" id="name" onKeyDown={keyDown} placeholder="Enter username" />
+              <GoogleLogin
+                clientId="470331494523-puqdl0ljl3adqt7eab1n12e7a64hf7hb.apps.googleusercontent.com"
+                buttonText="Login with Google"
+                onSuccess={responseGoogle}
+                onFailure={responseGoogle}
+              />
             </div>
         </div>
     </div>
