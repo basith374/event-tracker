@@ -1,4 +1,5 @@
 import React, { useRef } from 'react';
+import { useLocation } from 'react-router-dom'
 import 'firebase/firestore';
 import './register.css';
 
@@ -7,6 +8,7 @@ function Loading() {
 }
 
 export default function Register(props) {
+    const location = useLocation();
     let clicktimer = useRef();
     let register = (event) => {
         props.setEvent(event);
@@ -29,17 +31,17 @@ export default function Register(props) {
     }
     return (
         <div className="reg">
-            <div className="reg-h">
+            {location.pathname === '/' && <div className="reg-h">
                 <button onClick={props.createEvent}>
                     <img src={require('../plus.png')} alt="plus" />
                 </button>
-            </div>
+            </div>}
             {!props.busy && props.events.length === 0 && <div className="reg-e">
                 <div className="txt">
                     Add new
                 </div>
                 <div className="image">
-                    <img src={require('../swirly-scribbled-arrow.png')} />
+                    <img src={require('../swirly-scribbled-arrow.png')} alt="arrow" />
                 </div>
             </div>}
             {props.busy && <Loading />}

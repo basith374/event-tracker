@@ -1,4 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Switch,
+  Route,
+  useHistory,
+  useLocation,
+} from "react-router-dom";
 import './App.css';
 import Register from './components/Register';
 import Calendar from './components/Calendar';
@@ -11,14 +17,15 @@ import DeleteModal from './components/DeleteModal';
 import Login from './components/Login';
 
 function App() {
-  let [tab, setTab] = useState('register');
-  let [event, setEvent] = useState([]);
+  const history = useHistory();
+  const location = useLocation();
+  let [event, setEvent] = useState([]); // working list
   let localUser = localStorage.getItem('user');
-  let [events, setEvents] = useState([]);
+  let [events, setEvents] = useState([]); // display list
   let [user, setUser] = useState(localUser || '');
   let [busy, setBusy] = useState(true);
   let db = firebase.firestore();
-  let fetchEvents = () => {
+  let fetchEvents = useCallback(() => {
     let ref = db.collection(eventKey(localStorage.getItem('user')));
     ref.get().then(snap => {
       let events = [];
@@ -33,15 +40,14 @@ function App() {
       setEvents(events);
       setBusy(false);
     });
-  }
+  }, [db])
   useEffect(() => {
     window.onpopstate = () => {
-      let _tab = 'register'
-      if(tab === 'color') _tab = 'create';
-      if(event.length) setEvent(event.slice(0, event.length - 1));
-      setTab(_tab);
+      // check should pop event
+      const rEvent = event.length > 0 && location.pathname !== '/compare';
+      if(rEvent) setEvent(event.slice(0, event.length - 1));
     }
-  }, [event]);
+  }, [event, location]);
   useEffect(() => {
     let localUser = localStorage.getItem('user');
     if(localUser) {
@@ -51,23 +57,23 @@ function App() {
     } else {
       setBusy(false);
     }
-  }, []);
+  }, [db, fetchEvents]);
   let openEvent = (e) => {
     setEvent(event.concat(e));
-    setTab('calendar');
+    history.push('calendar')
   }
   let editEvent = event => {
     setEvent([event]);
-    setTab('create');
+    history.push('create')
   }
   let createEvent = () => {
     setEvent([]);
     window._event = null;
-    setTab('create');
+    history.push('create')
   }
   let saveTemp = name => {
     window.name = name;
-    setTab('color');
+    history.push('color')
   }
   let saveEvent = color => {
     let db = firebase.firestore();
@@ -89,36 +95,47 @@ function App() {
         }, eventNew)));
       });
     }
-    setTab('register');
+    history.replace('/')
   }
   let deleteItem = id => {
     let localUser = localStorage.getItem('user');
     db.collection('foo_users/' + localUser + '/items').doc(id).delete();
-    setTab('register');
+    history.replace('/')
     setEvents(events.filter(e => e.id !== id));
   }
-  useEffect(() => {
-    let tabs = [
-      'create',
-      'calendar',
-      'compare',
-    ];
-    if(tabs.includes(tab)) window.history.pushState({}, '', '');
-  }, [tab]);
-  let openCompareMode = () => setTab('compare');
   let showApp = () => {
-    if(['register', 'compare'].includes(tab)) return <Register
-      busy={busy}
-      setEvent={openEvent}
-      events={events}
-      editEvent={editEvent}
-      createEvent={createEvent}
-      event={event} />
-    if(tab === 'calendar') return <Calendar event={event} setEvent={setEvent} events={events} compareMode={openCompareMode} />
-    if(tab === 'create') return <Create saveTemp={saveTemp} setTab={setTab} event={event} />
-    if(tab === 'color') return <ColorPicker setColor={saveEvent} />
-    if(tab === 'delete') return <DeleteModal event={event[0]} setTab={setTab} removeItem={deleteItem} />
-    return null;
+    return <Switch>
+    <Route path="/calendar">
+      <Calendar event={event} setEvent={setEvent} events={events} />
+    </Route>
+    <Route path="/create">
+      <Create saveTemp={saveTemp} event={event} />
+    </Route>
+    <Route path="/color">
+      <ColorPicker setColor={saveEvent} />
+    </Route>
+    <Route path="/delete">
+      <DeleteModal event={event[0]} removeItem={deleteItem} />
+    </Route>
+    <Route path="/compare">
+      <Register
+        busy={busy}
+        setEvent={openEvent}
+        events={events}
+        editEvent={editEvent}
+        createEvent={createEvent}
+        event={event} />
+    </Route>
+    <Route path="/">
+      <Register
+        busy={busy}
+        setEvent={openEvent}
+        events={events}
+        editEvent={editEvent}
+        createEvent={createEvent}
+        event={event} />
+    </Route>
+    </Switch>
   }
   return (
     <div className="App">

@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import './calendar.css';
 import moment from 'moment';
 import _ from 'lodash';
@@ -156,6 +157,7 @@ const fillUp = (offset, maxBoxes, boxHeight, event) => {
 }
 
 export default function Calendar(props) {
+    const history = useHistory();
     let scrollDbnce = useRef();
     let [compare, setCompare] = useState(true);
     useEffect(() => {
@@ -173,13 +175,14 @@ export default function Calendar(props) {
         // fill up tiles
         fillUp(bufferBoxes + parseInt(visibleBoxes / 2, 10), maxBoxes, boxHeight, props.event);
         // attach scroll listeners
-        document.querySelector('.cal-c').addEventListener('scroll', e => {
+        const scrollListener = e => {
             if(scrollDbnce.current) clearTimeout(scrollDbnce.current);
             scrollDbnce.current = setTimeout(() => {
                 setCompare(true);
             }, 100);
             setCompare(false);
             let parent = document.querySelector('.cal');
+            if(parent)
             if(e.target.scrollTop >= bufferHeight + boxHeight) { // scroll down
                 let el = parent.firstChild;
                 parent.removeChild(el);
@@ -205,7 +208,8 @@ export default function Calendar(props) {
                 fetchWeek(props.event, el);
                 parent.insertBefore(el, parent.firstChild);
             }
-        });
+        };
+        document.querySelector('.cal-c').addEventListener('scroll', scrollListener);
         // scroll top mid
         document.querySelector('.cal-c').scrollTop = bufferHeight;
         // toggle listeners, punch, register
@@ -250,7 +254,11 @@ export default function Calendar(props) {
                     });
             }
         });
-    }, []);
+        return () => {
+            document.querySelector('.cal-c').removeEventListener('scroll', scrollListener);
+        }
+    }, [props.event]);
+    const canShowCompare = props.events.length > 1 && props.event.length < 3
     return (
         <div className="cal-p">
             <div className="cal-h">
@@ -263,10 +271,11 @@ export default function Calendar(props) {
                 <div>S</div>
             </div>
             <div className="cal-c">
-                <div className="cal"></div>
+                <div className="cal">
+                </div>
             </div>
-            {props.events.length > 1 && props.event.length < 3 && <div className={'c-flt' + (compare ? ' show' : '')}>
-                <button onClick={props.compareMode}>Compare</button>
+            {canShowCompare && <div className={'c-flt' + (compare ? ' show' : '')}>
+                <button onClick={() => history.push('/compare')}>Compare</button>
             </div>}
         </div>
     )

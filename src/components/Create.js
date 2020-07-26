@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { useHistory } from 'react-router-dom';
 import _ from 'lodash';
 
 export default function Create(props) {
+    const history = useHistory();
     let forward = () => {
         let name = document.getElementById('name').value;
         if(name) {
@@ -28,7 +30,7 @@ export default function Create(props) {
                     <div className="lbl">Danger zone</div>
                 </div>,
                 <div key={1}>
-                    <button type="button" className="danger" onClick={() => props.setTab('delete')}>Delete</button>
+                    <button type="button" className="danger" onClick={() => history.push('delete')}>Delete</button>
                 </div>
             ]}
         </form>

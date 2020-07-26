@@ -16,7 +16,7 @@ export default function DeleteModal(props) {
                 <input type="text" placeholder="Enter name" id="name" />
             </div>
             <div className="App-sect">
-                <button className="danger" onClick={onDelete}>Delete</button>
+                <button type="button" className="danger" onClick={onDelete}>Delete</button>
             </div>
         </form>
     </div>
