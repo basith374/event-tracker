@@ -213,7 +213,7 @@ export default function Calendar(props) {
         // scroll top mid
         document.querySelector('.cal-c').scrollTop = bufferHeight;
         // toggle listeners, punch, register
-        document.querySelector('.cal').addEventListener('click', e => {
+        const clickListener = e => {
             let el = e.target;
             if(el && props.event.length === 1) {
                 if(!/\d{2}-\d{2}-\d{4}/.test(el.id)) el = el.parentNode;
@@ -253,9 +253,11 @@ export default function Calendar(props) {
                         styleTile(el, el.id, hasEvents ? props.event : null); // undo
                     });
             }
-        });
+        }
+        document.querySelector('.cal').addEventListener('click', clickListener);
         return () => {
             document.querySelector('.cal-c').removeEventListener('scroll', scrollListener);
+            document.querySelector('.cal').removeEventListener('click', clickListener);
         }
     }, [props.event]);
     const canShowCompare = props.events.length > 1 && props.event.length < 3

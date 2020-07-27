@@ -5,7 +5,7 @@ import GoogleLogin from 'react-google-login';
 import _ from 'lodash';
 
 function Loading() {
-  return <div className="ld dk"><div></div></div>
+  return <div className="ld"><div></div></div>
 }
 
 export default function Login(props) {
@@ -39,6 +39,7 @@ export default function Login(props) {
         console.log(response)
       }
     }
+    const renderLoginBtn = props => <button className="lgbtn" onClick={props.onClick} disabled={props.disabled}><img src={require('../icons8-google.svg')} alt="google" />Login with Google</button>
     const render = () => {
       if(busy) return <Loading />
       return <div>
@@ -49,7 +50,7 @@ export default function Login(props) {
             <div>
               <GoogleLogin
                 clientId="470331494523-puqdl0ljl3adqt7eab1n12e7a64hf7hb.apps.googleusercontent.com"
-                buttonText="Login with Google"
+                render={renderLoginBtn}
                 onRequest={() => setBusy(true)}
                 onSuccess={responseGoogle}
                 onFailure={responseGoogle}

@@ -85,10 +85,19 @@ button.green {
   background: #27ae60;
 }
 .App-login {
-  background: #fff;
+  /* background: #fff; */
+  color: #fff;
 }
-.App-login input {
-  color: #000;
+.App-login button {
+  border-radius: 4px;
+  padding: 0 20px;
+  line-height: 60px;
+}
+.App-login button img {
+  vertical-align: top;
+  width: 30px;
+  margin-top: 15px;
+  margin-right: 10px;
 }
 .App-colors {
   display: flex;
