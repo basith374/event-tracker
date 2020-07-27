@@ -49,15 +49,20 @@ function App() {
     }
   }, [event, location]);
   useEffect(() => {
-    let localUser = localStorage.getItem('user');
-    if(localUser) {
-      db.doc('foo_users/' + localUser).get().then(doc => {
-        if(doc.exists) fetchEvents();
-      });
+    if(!user) {
+      setEvents([]);
+      setBusy(true);
     } else {
-      setBusy(false);
+      let localUser = localStorage.getItem('user');
+      if(localUser) {
+        db.doc('foo_users/' + localUser).get().then(doc => {
+          if(doc.exists) fetchEvents();
+        });
+      } else {
+        setBusy(false);
+      }
     }
-  }, [db, fetchEvents]);
+  }, [db, fetchEvents, user]);
   let openEvent = (e) => {
     setEvent(event.concat(e));
     history.push('calendar')
