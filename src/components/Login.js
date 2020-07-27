@@ -10,18 +10,18 @@ export default function Login(props) {
       db.collection('foo_users')
         .where('username', '==', username)
         .get()
-        .then(ref => {
-          if(ref.size) {
-            const id = ref.docs[0].id;
+        .then(snap => {
+          if(snap.size) {
+            const id = snap.docs[0].id;
             props.setUser(id);
             localStorage.setItem('user', id);
           } else {
             db.collection('foo_users').add({
               join: new Date(),
               username,
-            }).then(ref => {
-              props.setUser(ref.id);
-              localStorage.setItem('user', ref.id);
+            }).then(snap => {
+              props.setUser(snap.id);
+              localStorage.setItem('user', snap.id);
             })
           }
         });
