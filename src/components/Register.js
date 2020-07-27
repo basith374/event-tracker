@@ -31,11 +31,15 @@ export default function Register(props) {
     }
     return (
         <div className="reg">
-            {location.pathname === '/' && <div className="reg-h">
-                <button onClick={props.createEvent}>
-                    <img src={require('../plus.png')} alt="plus" />
+            <div className="reg-h">
+                <button onClick={props.logout} className="lgt">
+                    <img src={require('../turn-off.svg')} alt="plus" />
                 </button>
-            </div>}
+                {location.pathname === '/' && 
+                <button onClick={props.createEvent} className="pls">
+                    <img src={require('../plus.png')} alt="plus" />
+                </button>}
+            </div>
             {!props.busy && props.events.length === 0 && <div className="reg-e">
                 <div className="txt">
                     Add new

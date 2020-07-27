@@ -103,6 +103,10 @@ function App() {
     history.replace('/')
     setEvents(events.filter(e => e.id !== id));
   }
+  const logout = () => {
+    localStorage.removeItem('user');
+    setUser(false);
+  }
   let showApp = () => {
     return <Switch>
     <Route path="/calendar">
@@ -124,7 +128,8 @@ function App() {
         events={events}
         editEvent={editEvent}
         createEvent={createEvent}
-        event={event} />
+        event={event}
+        logout={logout} />
     </Route>
     <Route path="/">
       <Register
@@ -133,7 +138,8 @@ function App() {
         events={events}
         editEvent={editEvent}
         createEvent={createEvent}
-        event={event} />
+        event={event}
+        logout={logout} />
     </Route>
     </Switch>
   }

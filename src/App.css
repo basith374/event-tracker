@@ -29,6 +29,9 @@ button {
   border-color: #fff transparent #fff transparent;
   animation: ld-ring 0.7s linear infinite;
 }
+.ld.dk div {
+  border-color: #555 transparent #555 transparent;
+}
 @keyframes ld-ring {
   0% {transform: rotate(0);}
   100% {transform: rotate(360deg);}
