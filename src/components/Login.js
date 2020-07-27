@@ -6,31 +6,30 @@ import _ from 'lodash';
 
 export default function Login(props) {
     let login = (username) => {
-      if(username) {
-        let db = firebase.firestore();
-        db.collection('foo_users')
-          .where('username', '==', username)
-          .get()
-          .then(ref => {
-            if(ref.size()) {
-              const id = ref.docs()[0].id();
-              props.setUser(id);
-              localStorage.setItem('user', id);
-            } else {
-              db.collection('foo_users').add({
-                join: new Date(),
-                username,
-              }).then(ref => {
-                props.setUser(ref.id);
-                localStorage.setItem('user', ref.id);
-              })
-            }
-          });
-      }
+      let db = firebase.firestore();
+      db.collection('foo_users')
+        .where('username', '==', username)
+        .get()
+        .then(ref => {
+          if(ref.size) {
+            const id = ref.docs[0].id;
+            props.setUser(id);
+            localStorage.setItem('user', id);
+          } else {
+            db.collection('foo_users').add({
+              join: new Date(),
+              username,
+            }).then(ref => {
+              props.setUser(ref.id);
+              localStorage.setItem('user', ref.id);
+            })
+          }
+        });
     }
     const responseGoogle = (response) => {
       const email = _.get(response, 'profileObj.email');
-      login(email)
+      if(email) login(email)
+      else console.log(response)
     }
     return <div className="App-center App-login">
         <div>
@@ -44,6 +43,7 @@ export default function Login(props) {
                 buttonText="Login with Google"
                 onSuccess={responseGoogle}
                 onFailure={responseGoogle}
+                isSignedIn={true}
               />
             </div>
         </div>
