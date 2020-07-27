@@ -13,7 +13,8 @@ export default function Register(props) {
     let register = (event) => {
         props.setEvent(event);
     }
-    let onMouseUp = () => {
+    let onMouseUp = (e) => {
+        e.preventDefault()
         clearTimeout(clicktimer.current);
         if(window._event) register(window._event);
     }
