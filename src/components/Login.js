@@ -12,9 +12,10 @@ export default function Login(props) {
           .where('username', '==', username)
           .get()
           .then(ref => {
-            if(ref.length) {
-              props.setUser(ref[0].id);
-              localStorage.setItem('user', ref[0].id);
+            if(ref.size()) {
+              const id = ref.docs()[0].id();
+              props.setUser(id);
+              localStorage.setItem('user', id);
             } else {
               db.collection('foo_users').add({
                 join: new Date(),
