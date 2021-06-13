@@ -18,8 +18,7 @@ function useAuth() {
           .signInWithRedirect(provider)
           .then((result) => {
             setAuth(true);
-          })
-          .catch((error) => {});
+          });
       }
     });
   }, []);
