@@ -1,4 +1,4 @@
 module.exports = {
-    eventKey: 'events',
-    dataKey: 'dates',
-}
+  eventKey: "events",
+  dataKey: "dates",
+};
