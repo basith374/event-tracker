@@ -2,9 +2,10 @@ import React, { useEffect } from 'react';
 import './calendar.css';
 import moment from 'moment';
 import _ from 'lodash';
-import * as firebase from 'firebase/app';
+import firebase from 'firebase/app';
 import 'firebase/firestore';
 import { dataKey } from '../config';
+import { useParams } from 'react-router';
 
 function createText(p, text, cls) {
     let c = document.createElement('div');
@@ -69,12 +70,13 @@ function fillWeek(row, date, odd, month) {
 }
 
 function fetchWeek(event, row) {
+  const db = firebase.firestore();
     let first = moment(row.getAttribute('date'), 'DD-MM-YYYY').valueOf();
     let last = moment(row.getAttribute('date'), 'DD-MM-YYYY').endOf('week').valueOf();
-    window.db.collection(dataKey)
+    db.collection(dataKey)
         .where('time', '>=', first)
         .where('time', '<=', last)
-        .where('event', '==', event.id)
+        .where('event', '==', event)
         .get()
         .then(snap => {
             snap.forEach(f => {
@@ -96,6 +98,7 @@ window.expander = (db) => {
 }
 
 const fillUp = (offset, maxBoxes, boxHeight, event) => {
+  const db = firebase.firestore();
     let odd = true;
     let start = moment().startOf('week').subtract(offset, 'weeks');
     let month = start.month();
@@ -114,10 +117,10 @@ const fillUp = (offset, maxBoxes, boxHeight, event) => {
     })
     let first = moment(rows[0].getAttribute('date'), 'DD-MM-YYYY').valueOf();
     let last = moment(rows[rows.length - 1].getAttribute('date'), 'DD-MM-YYYY').endOf('day').valueOf();
-    window.db.collection(dataKey)
+    db.collection(dataKey)
         .where('time', '>=', first)
         .where('time', '<=', last)
-        .where('event', '==', event.id)
+        .where('event', '==', event)
         .get()
         .then(snap => {
             snap.forEach(f => {
@@ -133,10 +136,9 @@ const fillUp = (offset, maxBoxes, boxHeight, event) => {
         });
 }
 
-export default function Calendar(props) {
+export default function Calendar() {
+  const { event } = useParams();
     useEffect(() => {
-        let db = firebase.firestore();
-        window.db = db;
         let boxHeight = 60;
         // calculations, dimensions, resize
         let height = document.querySelector('.cal').offsetHeight;
@@ -147,7 +149,7 @@ export default function Calendar(props) {
         let bufferHeight = boxHeight * bufferBoxes;
         document.querySelector('.cal').style.height = newHeight + 'px';
         // fill up tiles
-        fillUp(bufferBoxes + parseInt(visibleBoxes / 2, 10), maxBoxes, boxHeight, props.event);
+        fillUp(bufferBoxes + parseInt(visibleBoxes / 2, 10), maxBoxes, boxHeight, event);
         // attach scroll listeners
         document.querySelector('.cal-c').addEventListener('scroll', e => {
             let parent = document.querySelector('.cal');
@@ -161,7 +163,7 @@ export default function Calendar(props) {
                 let month = time.month();
                 let odd = month !== prevMonth ? !curOdd : curOdd;
                 fillWeek(el, time.format('DD-MM-YYYY'), odd, month);
-                fetchWeek(props.event, el);
+                fetchWeek(event, el);
                 parent.appendChild(el);
             } else if(e.target.scrollTop < bufferHeight) { // scroll up
                 let el = parent.lastChild;
@@ -173,7 +175,7 @@ export default function Calendar(props) {
                 let month = time.month();
                 let odd = month !== prevMonth ? !curOdd : curOdd;
                 fillWeek(el, time.format('DD-MM-YYYY'), odd, month);
-                fetchWeek(props.event, el);
+                fetchWeek(event, el);
                 parent.insertBefore(el, parent.firstChild);
             }
         });
@@ -181,6 +183,7 @@ export default function Calendar(props) {
         document.querySelector('.cal-c').scrollTop = bufferHeight;
         // toggle listeners, punch, register
         document.querySelector('.cal').addEventListener('click', e => {
+          const db = firebase.firestore();
             let el = e.target;
             if(el) {
                 if(!/\d{2}-\d{2}-\d{4}/.test(el.id)) el = el.parentNode;
@@ -189,13 +192,13 @@ export default function Calendar(props) {
                 let start = date.startOf('day').valueOf();
                 let end = date.endOf('day').valueOf();
                 let hasEvents = el.hasAttribute('has-events');
-                styleTile(el, el.id, hasEvents ? null : props.event);
+                styleTile(el, el.id, hasEvents ? null : event);
                 el.classList.add('block');
-                if(props.event)
+                if(event)
                 db.collection(dataKey)
                     .where('time', '>=', start)
                     .where('time', '<=', end)
-                    .where('event', '==', props.event.id)
+                    .where('event', '==', event)
                     .get()
                     .then(snap => {
                         el.classList.remove('block');
@@ -211,17 +214,17 @@ export default function Calendar(props) {
                         } else {
                             db.collection(dataKey).add({
                                 time: date.valueOf(),
-                                event: props.event.id,
+                                event: event.id,
                             });
-                            styleTile(el, el.id, props.event);
+                            styleTile(el, el.id, event);
                         }
                     }).catch(rsp => {
                         el.classList.remove('block');
-                        styleTile(el, el.id, hasEvents ? props.event : null); // undo
+                        styleTile(el, el.id, hasEvents ? event : null); // undo
                     });
             }
         });
-    }, []);
+    }, [event]);
     return (
         <div className="cal-p">
             <div className="cal-h">
