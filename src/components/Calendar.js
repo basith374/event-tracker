@@ -3,7 +3,6 @@ import "./calendar.css";
 import moment from "moment";
 import _ from "lodash";
 import firebase from "firebase/app";
-import "firebase/firestore";
 import { dataKey, eventKey } from "../config";
 import { useParams } from "react-router";
 

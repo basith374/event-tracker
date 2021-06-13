@@ -3,8 +3,6 @@ import "./App.css";
 import Register from "./components/Register";
 import Calendar from "./components/Calendar";
 import firebase from "firebase/app";
-import "firebase/firestore";
-import "firebase/auth";
 import { Route, BrowserRouter as Router, Switch } from "react-router-dom";
 
 function useAuth() {

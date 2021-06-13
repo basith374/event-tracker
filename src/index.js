@@ -6,7 +6,8 @@ import * as serviceWorker from './serviceWorker';
 import moment from 'moment';
 import _ from 'lodash';
 import firebase from 'firebase/app';
-require('firebase/firestore');
+import "firebase/firestore";
+import "firebase/auth";
 
 firebase.initializeApp({
     apiKey: process.env.REACT_APP_API_KEY,
