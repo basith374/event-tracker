@@ -1,27 +1,52 @@
-import React from 'react';
-import 'firebase/firestore';
-import './register.css';
+import React, { useEffect, useState } from "react";
+import firebase from "firebase/app";
+import "./register.css";
+import { Loading } from "../App";
+import { useHistory } from "react-router";
+import { eventKey } from "../config";
 
-function Loading() {
-    return <div className="ld"><div></div></div>
-}
-
-export default function Register(props) {
-    let register = (event) => {
-        props.setEvent(event);
-    }
-    return (
-        <div className="reg">
-            {props.busy && <Loading />}
-            {props.events.length > 0 && <div className="reg-b">
-                {props.events.map((e, i) => <div
-                    className="reg-i"
-                    id={e.id}
-                    style={{background: e.color}}
-                    key={i}
-                    onClick={() => register(e)}
-                    >{e.name}</div>)}
-            </div>}
+export default function Register() {
+  const [busy, setBusy] = useState(true);
+  const [events, setEvents] = useState([]);
+  const history = useHistory();
+  useEffect(() => {
+    let db = firebase.firestore();
+    let fetchEvents = () => {
+      let ref = db.collection(eventKey);
+      ref.get().then((snap) => {
+        let events = [];
+        snap.forEach((d) => {
+          let item = d.data();
+          events.push({
+            id: d.id,
+            name: item.name,
+            color: item.color,
+          });
+        });
+        setEvents(events);
+        setBusy(false);
+      });
+    };
+    fetchEvents();
+  }, []);
+  return (
+    <div className="reg">
+      {busy && <Loading />}
+      {events.length > 0 && (
+        <div className="reg-b">
+          {events.map((e, i) => (
+            <div
+              className="reg-i"
+              id={e.id}
+              style={{ background: e.color }}
+              key={i}
+              onClick={() => history.push("/calendar/" + e.id)}
+            >
+              {e.name}
+            </div>
+          ))}
         </div>
-    )
+      )}
+    </div>
+  );
 }
