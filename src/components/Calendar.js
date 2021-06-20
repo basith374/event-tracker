@@ -90,6 +90,11 @@ function fillWeek(row, date, odd, month) {
   return _.uniq(months).length > 1;
 }
 
+function highlightTile(tile) {
+  tile.children[0].classList.add("hg");
+  setTimeout(() => tile.children[0].classList.remove("hg"), 1000);
+}
+
 function fetchWeek(event, row) {
   const db = firebase.firestore();
   let first = moment(row.getAttribute("date"), "DD-MM-YYYY").valueOf();
@@ -107,6 +112,7 @@ function fetchWeek(event, row) {
         let date = moment(data.time).format("DD-MM-YYYY");
         let tile = row.querySelectorAll(".cal-dat")[moment(data.time).day()];
         if (tile.id === date) styleTile(tile, date, event);
+        else highlightTile(tile);
       });
     });
 }

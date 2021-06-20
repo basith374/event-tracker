@@ -77,3 +77,10 @@
     background: #fff;
     color: #555;
 }
+.c-d.hg {
+    animation: 1s highlight;
+}
+@keyframes highlight {
+    from { background: rgb(243 208 24 / 14%); }
+    to { background: transparent; }
+}
