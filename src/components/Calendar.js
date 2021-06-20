@@ -22,8 +22,13 @@ function createTile(con, date) {
   styleTile(con, date);
 }
 
+function updateTile(con, date) {
+  const d = moment(date, "DD-MM-YYYY");
+  con.children[0].innerHTML = d.date();
+  styleTile(con, date);
+}
+
 function styleTile(tile, date, event) {
-  let style = {};
   let target = tile.children[0];
   let d = moment(date, "DD-MM-YYYY");
   // future
@@ -39,14 +44,28 @@ function styleTile(tile, date, event) {
     tile.classList.remove("lit");
   }
   if (event) {
-    style.background = event.color || "";
+    target.style.background = event.color;
     tile.setAttribute("has-events", true);
     tile.classList.remove("lit");
   } else {
-    style.background = null;
+    target.style = null;
     tile.removeAttribute("has-events");
   }
-  if (target) Object.keys(style).forEach((s) => (target.style[s] = style[s]));
+}
+
+function updateWeek(row, date, odd, month) {
+  if (odd) row.classList.add("odd");
+  else row.classList.remove("odd");
+  for (let i = 0; i < 7; i++) {
+    let day = row.children[i];
+    let _date = moment(date, "DD-MM-YYYY").add(i, "day");
+    day.classList[_date.month() !== month ? "add" : "remove"]("odd");
+    let d = _date.format("DD-MM-YYYY");
+    updateTile(day, d);
+    day.id = d;
+  }
+  row.id = "week-" + date;
+  row.setAttribute("date", date);
 }
 
 function fillWeek(row, date, odd, month) {
@@ -85,11 +104,10 @@ function fetchWeek(event, row) {
     .then((snap) => {
       snap.forEach((f) => {
         let data = f.data();
-        let date = moment(data.time).startOf("week").format("DD-MM-YYYY");
+        let date = moment(data.time).format("DD-MM-YYYY");
         let tile = row.children[moment(data.time).day()];
-        if (tile) styleTile(tile, date, event);
+        if (tile.id === date) styleTile(tile, date, event);
       });
-      row.setAttribute("has-events", snap.length > 0);
     });
 }
 
@@ -135,7 +153,6 @@ const fillUp = (offset, maxBoxes, event) => {
         if (row) {
           let tile = row.children[moment(data.time).day()];
           if (tile) styleTile(tile, date, event);
-          row.setAttribute("has-events", true);
         }
       });
     });
@@ -155,7 +172,7 @@ function scrollListener(event) {
       let curOdd = parent.lastChild.classList.contains("odd");
       let month = time.month();
       let odd = month !== prevMonth ? !curOdd : curOdd;
-      fillWeek(el, time.format("DD-MM-YYYY"), odd, month);
+      updateWeek(el, time.format("DD-MM-YYYY"), odd, month);
       fetchWeek(event, el);
       parent.appendChild(el);
     } else if (e.target.scrollTop < bufferHeight) {
@@ -168,7 +185,7 @@ function scrollListener(event) {
       let curOdd = parent.firstChild.classList.contains("odd");
       let month = time.month();
       let odd = month !== prevMonth ? !curOdd : curOdd;
-      fillWeek(el, time.format("DD-MM-YYYY"), odd, month);
+      updateWeek(el, time.format("DD-MM-YYYY"), odd, month);
       fetchWeek(event, el);
       parent.insertBefore(el, parent.firstChild);
     }
