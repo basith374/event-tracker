@@ -30,15 +30,13 @@
     left: 0;
     right: 0;
 }
+/* row */
 .cal-i {
     text-align: center;
     display: flex;
     color: #fff;
     user-select: none;
     height: 60px;
-}
-.cal-row {
-    display: flex;
 }
 .cal-dat {
     display: flex;

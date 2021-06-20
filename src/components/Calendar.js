@@ -57,7 +57,7 @@ function updateWeek(row, date, odd, month) {
   if (odd) row.classList.add("odd");
   else row.classList.remove("odd");
   for (let i = 0; i < 7; i++) {
-    let day = row.children[i];
+    let day = row.querySelectorAll(".cal-dat")[i];
     let _date = moment(date, "DD-MM-YYYY").add(i, "day");
     day.classList[_date.month() !== month ? "add" : "remove"]("odd");
     let d = _date.format("DD-MM-YYYY");
@@ -105,7 +105,7 @@ function fetchWeek(event, row) {
       snap.forEach((f) => {
         let data = f.data();
         let date = moment(data.time).format("DD-MM-YYYY");
-        let tile = row.children[moment(data.time).day()];
+        let tile = row.querySelectorAll(".cal-dat")[moment(data.time).day()];
         if (tile.id === date) styleTile(tile, date, event);
       });
     });
@@ -151,7 +151,7 @@ const fillUp = (offset, maxBoxes, event) => {
         let date = moment(data.time).startOf("week").format("DD-MM-YYYY");
         let row = document.getElementById("week-" + date);
         if (row) {
-          let tile = row.children[moment(data.time).day()];
+          let tile = row.querySelectorAll(".cal-dat")[moment(data.time).day()];
           if (tile) styleTile(tile, date, event);
         }
       });
