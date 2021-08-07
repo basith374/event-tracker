@@ -37,6 +37,7 @@
     color: #fff;
     user-select: none;
     height: 60px;
+    position: relative;
 }
 .cal-dat {
     display: flex;
@@ -83,4 +84,17 @@
 @keyframes highlight {
     from { background: rgb(243 208 24 / 14%); }
     to { background: transparent; }
+}
+.m-l {
+    font-size: 50px;
+    color: #000;
+    position: absolute;
+    top: 120px;
+    margin: 0 auto;
+    left: 0;
+    right: 0;
+    z-index: 1;
+}
+.m-l.odd {
+    color: #222;
 }

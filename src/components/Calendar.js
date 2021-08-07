@@ -8,6 +8,20 @@ import { useParams } from "react-router";
 
 const BOX_HEIGHT = 60;
 const BUFFER_BOXES = 10;
+const MONTHS = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
 
 function createText(p, text, cls) {
   let c = document.createElement("div");
@@ -56,9 +70,11 @@ function styleTile(tile, date, event) {
 function updateWeek(row, date, odd, month) {
   if (odd) row.classList.add("odd");
   else row.classList.remove("odd");
+  let firstWeek = false;
   for (let i = 0; i < 7; i++) {
     let day = row.querySelectorAll(".cal-dat")[i];
     let _date = moment(date, "DD-MM-YYYY").add(i, "day");
+    if (_date.date() === 1) firstWeek = true;
     day.classList[_date.month() !== month ? "add" : "remove"]("odd");
     let d = _date.format("DD-MM-YYYY");
     updateTile(day, d);
@@ -66,18 +82,26 @@ function updateWeek(row, date, odd, month) {
   }
   row.id = "week-" + date;
   row.setAttribute("date", date);
+  let monthName = row.querySelector(".m-l");
+  if (firstWeek) {
+    if (!monthName) monthName = monthLabel(month, odd);
+    monthName.innerHTML = MONTHS[month];
+  } else if(monthName) {
+    row.removeChild(monthName);
+  }
 }
 
 function fillWeek(row, date, odd, month) {
-  row.innerHTML = "";
   if (odd) row.classList.add("odd");
   else row.classList.remove("odd");
   let months = [];
+  let firstWeek = false;
   for (let i = 0; i < 7; i++) {
     let day = document.createElement("div");
     let cls = ["cal-dat"];
     let _date = moment(date, "DD-MM-YYYY").add(i, "day");
     if (_date.month() !== month) cls.push("odd");
+    if (_date.date() === 1) firstWeek = true;
     day.className = cls.join(" ");
     let d = _date.format("DD-MM-YYYY");
     months.push(_date.month());
@@ -87,6 +111,7 @@ function fillWeek(row, date, odd, month) {
   }
   row.id = "week-" + date;
   row.setAttribute("date", date);
+  if (firstWeek) row.appendChild(monthLabel(month, odd));
   return _.uniq(months).length > 1;
 }
 
@@ -124,6 +149,14 @@ window.expander = (db) => {
     });
   });
 };
+
+function monthLabel(month, odd) {
+  const div = document.createElement("div");
+  div.className = "m-l" + (odd ? " odd" : "");
+  div.innerHTML = MONTHS[month + 1];
+  console.log(div.innerHTML);
+  return div;
+}
 
 const fillUp = (offset, maxBoxes, event) => {
   const db = firebase.firestore();
